@@ -35,39 +35,60 @@
         android:orientation="horizontal"
         android:paddingTop="4dp" >
 
-        <ImageButton
-            android:id="@+id/prev"
-            style="@android:style/MediaButton"
-            android:layout_width="wrap_content"
-            android:contentDescription="@string/back_description"
-            android:src="@android:drawable/ic_menu_revert"
-            tools:ignore="RequiredSize" /> <!-- style="@android:style/MediaButton.Previous" -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:gravity="right"
+            android:orientation="horizontal" >
+
+            <ImageButton
+                android:id="@+id/prev"
+                style="@android:style/MediaButton"
+                android:layout_width="wrap_content"
+                android:contentDescription="@string/back_description"
+                android:src="@drawable/ic_menu_back"
+                tools:ignore="RequiredSize" />
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/rew"
-            style="@android:style/MediaButton.Rew"
+            style="@android:style/MediaButton"
             android:contentDescription="@string/rew_description"
+            android:src="@drawable/ic_menu_rewind"
             tools:ignore="RequiredSize" />
 
         <ImageButton
             android:id="@+id/pause"
-            style="@android:style/MediaButton.Play"
+            style="@android:style/MediaButton"
             android:contentDescription="@string/play_description"
+            android:src="@drawable/ic_menu_pause"
             tools:ignore="RequiredSize" />
 
         <ImageButton
             android:id="@+id/ffwd"
-            style="@android:style/MediaButton.Ffwd"
+            style="@android:style/MediaButton"
             android:contentDescription="@string/ffwd_description"
+            android:src="@drawable/ic_menu_fastforward"
             tools:ignore="RequiredSize" />
 
-        <ImageButton
-            android:id="@+id/next"
-            style="@android:style/MediaButton"
-            android:layout_width="wrap_content"
-            android:contentDescription="@string/export_description"
-            android:src="@android:drawable/ic_menu_share"
-            tools:ignore="RequiredSize" /> <!-- style="@android:style/MediaButton.Next" -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:gravity="left"
+            android:orientation="horizontal" >
+
+            <ImageButton
+                android:id="@+id/next"
+                style="@android:style/MediaButton"
+                android:layout_width="wrap_content"
+                android:contentDescription="@string/export_description"
+                android:src="@drawable/ic_menu_share"
+                tools:ignore="RequiredSize" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout

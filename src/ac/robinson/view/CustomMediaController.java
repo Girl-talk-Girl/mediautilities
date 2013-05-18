@@ -425,9 +425,9 @@ public class CustomMediaController extends FrameLayout {
 			return;
 
 		if (mPlayer == null || mPlayer.isPlaying() || mPlayer.isLoading()) {
-			mPauseButton.setImageResource(android.R.drawable.ic_media_pause);
+			mPauseButton.setImageResource(R.drawable.ic_menu_pause);
 		} else {
-			mPauseButton.setImageResource(android.R.drawable.ic_media_play);
+			mPauseButton.setImageResource(R.drawable.ic_menu_play);
 		}
 	}
 
@@ -452,10 +452,10 @@ public class CustomMediaController extends FrameLayout {
 	private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
 		public void onStartTrackingTouch(SeekBar bar) {
 			mDragging = true;
-			
+
 			show(-1); // will be counted as 0, but not set to the default
 			if (mRoot != null || mPlayer != null || mPauseButton != null) { // we play by default on scroll
-				mPauseButton.setImageResource(android.R.drawable.ic_media_pause);
+				mPauseButton.setImageResource(R.drawable.ic_menu_pause);
 			}
 
 			// by removing these pending progress messages we make sure that a) we won't update the progress while the
@@ -592,7 +592,7 @@ public class CustomMediaController extends FrameLayout {
 		boolean canSeekBackward();
 
 		boolean canSeekForward();
-		
+
 		void onControllerVisibilityChange(boolean visible);
 	}
 }
