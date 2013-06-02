@@ -87,10 +87,14 @@ public class SVGView extends View {
 	public void onLayout(boolean changed, int l, int t, int r, int b) {
 		if ((changed || mBitmapChanged) && !isInEditMode()) { // isInEditMode so the Eclipse visual editor can load this
 			mBitmapChanged = false;
-			SVG svg = SVGParser.getSVGFromResource(getResources(), mResourceId);
-			mBackgroundBitmap = svg.getBitmap(r - l - getPaddingLeft() - getPaddingRight(), b - t - getPaddingBottom()
-					- getPaddingTop());
-			svg = null;
+			try {
+				SVG svg = SVGParser.getSVGFromResource(getResources(), mResourceId);
+				mBackgroundBitmap = svg.getBitmap(r - l - getPaddingLeft() - getPaddingRight(), b - t
+						- getPaddingBottom() - getPaddingTop());
+				svg = null;
+			} catch (Throwable th) {
+				mBackgroundBitmap = null; // out of memory...
+			}
 		}
 
 		super.onLayout(changed, l, t, r, b);

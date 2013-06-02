@@ -22,6 +22,7 @@ package ac.robinson.view;
 
 import ac.robinson.mediautilities.R;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.text.Layout.Alignment;
@@ -103,14 +104,24 @@ public class AutoResizeTextView extends TextView {
 	}
 
 	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		// set to the maximum size on rotation so we can force a resize of the text
+		setTextSize(TypedValue.COMPLEX_UNIT_PX, mMaxTextSize);
+	}
+
+	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		int requestedWidth = MeasureSpec.getSize(widthMeasureSpec);
 		int requestedHeight = MeasureSpec.getSize(heightMeasureSpec);
 		int horizontalPadding = getCompoundPaddingLeft() + getCompoundPaddingRight();
 		int verticalPadding = getCompoundPaddingTop() + getCompoundPaddingBottom();
-		Point fittedTextSize = resizeTextToFit(MeasureSpec.getSize(widthMeasureSpec) - horizontalPadding,
-				mMaxTextHeight > 0 ? Math.min(requestedHeight - verticalPadding, mMaxTextHeight - verticalPadding)
+		boolean useResizedDimensions = mMaxTextHeight > 0;
+		Point fittedTextSize = resizeTextToFit(requestedWidth - horizontalPadding,
+				useResizedDimensions ? Math.min(requestedHeight - verticalPadding, mMaxTextHeight - verticalPadding)
 						: requestedHeight - verticalPadding);
-		setMeasuredDimension(fittedTextSize.x + horizontalPadding, fittedTextSize.y + verticalPadding);
+		setMeasuredDimension(useResizedDimensions ? fittedTextSize.x + horizontalPadding : requestedWidth,
+				useResizedDimensions ? fittedTextSize.y + verticalPadding : requestedHeight);
 	}
 
 	/**
@@ -163,13 +174,13 @@ public class AutoResizeTextView extends TextView {
 			}
 		}
 
-		if (Math.abs(currentTextSize - newTextSize) > 1) {
-			setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
-
+		if (currentTextSize - newTextSize != -1) {
 			// some devices try to auto adjust line spacing, so here we force the default line spacing that was cached
 			// earlier - like setTextSize, this causes another layout invalidation as a side effect, which is why we
 			// check for different values, so we don't end up doing these loops forever, switching between two slightly
-			// different sizes and never actually pausing long enough to let the view be resized
+			// different sizes and never actually pausing long enough to let the view be resized; we don't use
+			// Math.abs() as we always want to resize to a smaller size (so all text shows), just not up to a larger one
+			setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
 			setLineSpacing(mSpacingAdd, mSpacingMult);
 		}
 
