@@ -55,6 +55,8 @@ public class BitmapUtilities {
 	// if a bitmap's width (height) is more than this many times its height (width) then the ScalingLogic.CROP option
 	// will be ignored and the bitmap will scaled to fit into the destination box to save memory
 	public static final int MAX_SAMPLE_WIDTH_HEIGHT_RATIO = 12;
+	
+	public static final float DOWNSCALE_RATIO = 6; // if using DOWNSCALE, will multiply the sample ratio by this value
 
 	public static class CacheTypeContainer {
 		public Bitmap.CompressFormat type;
@@ -70,8 +72,9 @@ public class BitmapUtilities {
 	public static Bitmap loadAndCreateScaledBitmap(String imagePath, int dstWidth, int dstHeight,
 			ScalingLogic scalingLogic, boolean rotateImage) {
 
-		Matrix imageMatrix = new Matrix();
+		Matrix imageMatrix = null;
 		if (rotateImage) {
+			imageMatrix = new Matrix();
 			int rotationNeeded = getImageRotationDegrees(imagePath);
 			if (rotationNeeded != 0) {
 				imageMatrix.postRotate(rotationNeeded);
@@ -286,10 +289,16 @@ public class BitmapUtilities {
 	 */
 	public static Bitmap createScaledBitmap(Bitmap unscaledBitmap, int dstWidth, int dstHeight,
 			ScalingLogic scalingLogic, Matrix imageMatrix) {
-		if (unscaledBitmap == null)
+		if (unscaledBitmap == null) {
 			return null;
-		unscaledBitmap = Bitmap.createBitmap(unscaledBitmap, 0, 0, unscaledBitmap.getWidth(),
-				unscaledBitmap.getHeight(), imageMatrix, true);
+		}
+		if (imageMatrix == null) {
+			unscaledBitmap = Bitmap.createBitmap(unscaledBitmap, 0, 0, unscaledBitmap.getWidth(),
+					unscaledBitmap.getHeight());
+		} else {
+			unscaledBitmap = Bitmap.createBitmap(unscaledBitmap, 0, 0, unscaledBitmap.getWidth(),
+					unscaledBitmap.getHeight(), imageMatrix, true);
+		}
 		Rect srcRect = calculateSrcRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), dstWidth, dstHeight,
 				scalingLogic);
 		Rect dstRect = calculateDstRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), dstWidth, dstHeight,
@@ -310,9 +319,11 @@ public class BitmapUtilities {
 	 * 
 	 * FIT: Scales the image the minimum amount while making sure both dimensions fit inside the requested destination
 	 * area. The resulting destination dimensions might be adjusted to a smaller size than requested.
+	 * 
+	 * DOWNSCALE: Like FIT, but will downscale the image by multiplying its normal sample rate by DOWNSCALE_RATIO.
 	 */
 	public static enum ScalingLogic {
-		CROP, FIT
+		CROP, FIT, DOWNSCALE
 	}
 
 	/**
@@ -335,6 +346,13 @@ public class BitmapUtilities {
 				return Math.round((float) srcWidth / (float) dstWidth);
 			} else {
 				return Math.round((float) srcHeight / (float) dstHeight);
+			}
+		} else if (scalingLogic == ScalingLogic.DOWNSCALE) {
+			final float dstAspect = (float) dstWidth / (float) dstHeight;
+			if (srcAspect > dstAspect) {
+				return Math.round(((float) srcWidth / (float) dstWidth) * DOWNSCALE_RATIO);
+			} else {
+				return Math.round(((float) srcHeight / (float) dstHeight) * DOWNSCALE_RATIO);
 			}
 		} else {
 			boolean tooTall = (float) srcHeight / (float) srcWidth > MAX_SAMPLE_WIDTH_HEIGHT_RATIO;
@@ -388,7 +406,7 @@ public class BitmapUtilities {
 	 */
 	private static Rect calculateDstRect(int srcWidth, int srcHeight, int dstWidth, int dstHeight,
 			ScalingLogic scalingLogic) {
-		if (scalingLogic == ScalingLogic.FIT) {
+		if (scalingLogic == ScalingLogic.FIT || scalingLogic == ScalingLogic.DOWNSCALE) {
 			final float srcAspect = (float) srcWidth / (float) srcHeight;
 			final float dstAspect = (float) dstWidth / (float) dstHeight;
 
