@@ -29,7 +29,8 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.Button;
 
-// TODO: still an issue with icon visibility when the keyboard is shown or hidden combined with rotation
+// TODO: this version still has an issue with icon visibility when the keyboard is shown or hidden, combined with 
+// rotation - use onSizeChanged to fix this?
 public class CenteredImageTextButton extends Button {
 
 	// for calculating the default padding
@@ -46,15 +47,11 @@ public class CenteredImageTextButton extends Button {
 	}
 
 	public CenteredImageTextButton(Context context) {
-		super(context);
-		mTextBounds = new Rect();
-		// can't initialise styles when not loading from XML
+		this(context, null);
 	}
 
 	public CenteredImageTextButton(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		mTextBounds = new Rect();
-		setStyles(context, attrs);
+		this(context, attrs, 0);
 	}
 
 	public CenteredImageTextButton(Context context, AttributeSet attrs, int defStyle) {
@@ -68,13 +65,15 @@ public class CenteredImageTextButton extends Button {
 	// see: http://code.google.com/p/android/issues/detail?id=9656 and http://devmaze.wordpress.com/2011/05/22/
 	// xmlns:util="http://util.robinson.ac/schema" vs. xmlns:util="http://schemas.android.com/apk/res-auto"
 	private void setStyles(Context context, AttributeSet attrs) {
-		TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CenteredImageTextButton);
-		int colourDefault = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorDefault, 0xffffffff);
-		int colourTouched = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorTouched, 0xffffffff);
-		attributes.recycle();
+		if (attrs != null) {
+			TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CenteredImageTextButton);
+			int colourDefault = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorDefault, 0xffffffff);
+			int colourTouched = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorTouched, 0xffffffff);
+			attributes.recycle();
 
-		if (!isInEditMode()) { // so the Eclipse visual editor can load this component
-			UIUtilities.setButtonColorFilters(this, colourDefault, colourTouched);
+			if (!isInEditMode()) { // so the Eclipse visual editor can load this component
+				UIUtilities.setButtonColorFilters(this, colourDefault, colourTouched);
+			}
 		}
 	}
 
