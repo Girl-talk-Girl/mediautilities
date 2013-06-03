@@ -37,7 +37,8 @@ public class CenteredImageTextButton extends Button {
 	private int mDrawableSize;
 	private boolean mLayoutChanged;
 	private DrawablePosition mDrawablePosition;
-	private Rect mTextBounds;
+
+	private Rect mTextBounds = new Rect();
 
 	// extra (optional) padding between the icon and the text
 	private int mIconPadding;
@@ -47,16 +48,19 @@ public class CenteredImageTextButton extends Button {
 	}
 
 	public CenteredImageTextButton(Context context) {
-		this(context, null);
+		super(context);
+		// can't initialise styles when not loading from XML
 	}
 
 	public CenteredImageTextButton(Context context, AttributeSet attrs) {
-		this(context, attrs, 0);
+		// can't combine with defStyle version here; we need android.R.attr.buttonStyle but defStyle doesn't work for
+		// custom views - see: https://code.google.com/p/android/issues/detail?id=12683
+		super(context, attrs);
+		setStyles(context, attrs);
 	}
 
 	public CenteredImageTextButton(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		mTextBounds = new Rect();
 		setStyles(context, attrs);
 	}
 
@@ -65,15 +69,13 @@ public class CenteredImageTextButton extends Button {
 	// see: http://code.google.com/p/android/issues/detail?id=9656 and http://devmaze.wordpress.com/2011/05/22/
 	// xmlns:util="http://util.robinson.ac/schema" vs. xmlns:util="http://schemas.android.com/apk/res-auto"
 	private void setStyles(Context context, AttributeSet attrs) {
-		if (attrs != null) {
-			TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CenteredImageTextButton);
-			int colourDefault = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorDefault, 0xffffffff);
-			int colourTouched = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorTouched, 0xffffffff);
-			attributes.recycle();
+		TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CenteredImageTextButton);
+		int colourDefault = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorDefault, 0xffffffff);
+		int colourTouched = attributes.getColor(R.styleable.CenteredImageTextButton_filterColorTouched, 0xffffffff);
+		attributes.recycle();
 
-			if (!isInEditMode()) { // so the Eclipse visual editor can load this component
-				UIUtilities.setButtonColorFilters(this, colourDefault, colourTouched);
-			}
+		if (!isInEditMode()) { // so the Eclipse visual editor can load this component
+			UIUtilities.setButtonColorFilters(this, colourDefault, colourTouched);
 		}
 	}
 
