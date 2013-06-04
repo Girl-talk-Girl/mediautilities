@@ -29,8 +29,6 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.Button;
 
-// TODO: this version still has an issue with icon visibility when the keyboard is shown or hidden, combined with 
-// rotation - use onSizeChanged to fix this?
 public class CenteredImageTextButton extends Button {
 
 	// for calculating the default padding
@@ -110,6 +108,10 @@ public class CenteredImageTextButton extends Button {
 				break;
 			default:
 				break;
+		}
+
+		if (windowSize == 0) {
+			return; // we don't have a size (probably mid-window resize or extracted keyboard) - wait until next update
 		}
 
 		// compound drawables aren't scaled automatically, so make sure the current drawable isn't too big for the view
