@@ -46,7 +46,7 @@ public class PlaybackController extends FrameLayout {
 	private static final int SEEK_FORWARD_MILLIS = 9000;
 	private static final int SEEK_BACKWARD_MILLIS = 3000;
 
-	private MediaPlayerControl mPlayer;
+	private MediaPlayerControl mPlayerControl;
 
 	private View.OnClickListener mBackListener;
 	private View.OnClickListener mShareListener;
@@ -66,6 +66,7 @@ public class PlaybackController extends FrameLayout {
 	private ImageButton mBackButton;
 	private ImageButton mShareButton;
 
+	private boolean mUseCustomSeekButtons;
 	private boolean mDragging;
 
 	public PlaybackController(Context context) {
@@ -141,9 +142,13 @@ public class PlaybackController extends FrameLayout {
 		super.setEnabled(enabled);
 	}
 
-	public void setMediaPlayer(MediaPlayerControl player) {
-		mPlayer = player;
+	public void setMediaPlayerControl(MediaPlayerControl player) {
+		mPlayerControl = player;
 		mProgressHandler.post(mProgressRunnable);
+	}
+
+	public void setUseCustomSeekButtons(boolean useCustomButtons) {
+		mUseCustomSeekButtons = useCustomButtons;
 	}
 
 	public void refreshController() {
@@ -160,12 +165,12 @@ public class PlaybackController extends FrameLayout {
 	Runnable mProgressRunnable = new Runnable() {
 		@Override
 		public void run() {
-			if (mPlayer == null) {
+			if (mPlayerControl == null) {
 				return;
 			}
 			// int pos = setProgress();
 			setProgress();
-			if (!mDragging && mPlayer.isPlaying()) {
+			if (!mDragging && mPlayerControl.isPlaying()) {
 				mProgressHandler.postDelayed(mProgressRunnable, UPDATE_INTERVAL_MILLIS); // was: 1000 - (pos % 1000)
 			}
 		}
@@ -187,11 +192,11 @@ public class PlaybackController extends FrameLayout {
 	}
 
 	private int setProgress() {
-		if (mPlayer == null || mDragging) {
+		if (mPlayerControl == null || mDragging) {
 			return 0;
 		}
-		int position = mPlayer.getCurrentPosition();
-		int duration = mPlayer.getDuration();
+		int position = mPlayerControl.getCurrentPosition();
+		int duration = mPlayerControl.getDuration();
 		if (mProgress != null) {
 			if (duration > 0) {
 				long pos = (long) PROGRESS_BAR_STEPS * position / duration; // use long to avoid overflow
@@ -236,8 +241,8 @@ public class PlaybackController extends FrameLayout {
 			}
 			return true;
 		} else if (keyCode == KeyEvent.KEYCODE_MEDIA_STOP) {
-			if (mPlayer != null && mPlayer.isPlaying()) {
-				mPlayer.pause();
+			if (mPlayerControl != null && mPlayerControl.isPlaying()) {
+				mPlayerControl.pause();
 				updatePausePlay();
 			}
 			return true;
@@ -255,10 +260,10 @@ public class PlaybackController extends FrameLayout {
 	};
 
 	private void updatePausePlay() {
-		if (mPlayer == null || mPauseButton == null) {
+		if (mPlayerControl == null || mPauseButton == null) {
 			return;
 		}
-		if (mPlayer.isPlaying()) {
+		if (mPlayerControl.isPlaying()) {
 			mPauseButton.setImageResource(R.drawable.ic_menu_pause);
 		} else {
 			mPauseButton.setImageResource(R.drawable.ic_menu_play);
@@ -266,13 +271,13 @@ public class PlaybackController extends FrameLayout {
 	}
 
 	private void doPauseResume() {
-		if (mPlayer == null) {
+		if (mPlayerControl == null) {
 			return;
 		}
-		if (mPlayer.isPlaying()) {
-			mPlayer.pause();
+		if (mPlayerControl.isPlaying()) {
+			mPlayerControl.pause();
 		} else {
-			mPlayer.play();
+			mPlayerControl.play();
 		}
 	}
 
@@ -293,14 +298,14 @@ public class PlaybackController extends FrameLayout {
 		}
 
 		public void onProgressChanged(SeekBar bar, int progress, boolean fromuser) {
-			if (!fromuser || mPlayer == null) {
+			if (!fromuser || mPlayerControl == null) {
 				// we're not interested in programmatically generated changes to the progress bar's position.
 				return;
 			}
 
-			long duration = mPlayer.getDuration();
+			long duration = mPlayerControl.getDuration();
 			long newposition = (duration * progress) / (long) PROGRESS_BAR_STEPS;
-			mPlayer.seekTo((int) newposition);
+			mPlayerControl.seekTo((int) newposition);
 			if (mCurrentTime != null) {
 				mCurrentTime.setText(stringForTime((int) newposition));
 			}
@@ -320,14 +325,18 @@ public class PlaybackController extends FrameLayout {
 
 	private View.OnClickListener mRewListener = new View.OnClickListener() {
 		public void onClick(View v) {
-			if (mPlayer == null) {
+			if (mPlayerControl == null) {
 				return;
 			}
-			int pos = mPlayer.getCurrentPosition() - SEEK_BACKWARD_MILLIS;
-			mPlayer.seekTo(pos < 0 ? 0 : pos);
+			if (mUseCustomSeekButtons) {
+				mPlayerControl.seekButton(-1);
+			} else {
+				int pos = mPlayerControl.getCurrentPosition() - SEEK_BACKWARD_MILLIS;
+				mPlayerControl.seekTo(pos < 0 ? 0 : pos);
+			}
 			setProgress();
 
-			if (mSeekEndListener != null) {
+			if (!mUseCustomSeekButtons && mSeekEndListener != null) {
 				mSeekEndListener.seekEnded();
 			}
 
@@ -337,14 +346,18 @@ public class PlaybackController extends FrameLayout {
 
 	private View.OnClickListener mFfwdListener = new View.OnClickListener() {
 		public void onClick(View v) {
-			if (mPlayer == null) {
+			if (mPlayerControl == null) {
 				return;
 			}
-			int pos = mPlayer.getCurrentPosition() + SEEK_FORWARD_MILLIS;
-			mPlayer.seekTo(pos > mPlayer.getDuration() ? mPlayer.getDuration() - 1 : pos);
+			if (mUseCustomSeekButtons) {
+				mPlayerControl.seekButton(1);
+			} else {
+				int pos = mPlayerControl.getCurrentPosition() + SEEK_FORWARD_MILLIS;
+				mPlayerControl.seekTo(pos > mPlayerControl.getDuration() ? mPlayerControl.getDuration() - 1 : pos);
+			}
 			setProgress();
 
-			if (mSeekEndListener != null) {
+			if (!mUseCustomSeekButtons && mSeekEndListener != null) {
 				mSeekEndListener.seekEnded();
 			}
 
@@ -390,6 +403,13 @@ public class PlaybackController extends FrameLayout {
 		int getCurrentPosition();
 
 		void seekTo(int pos);
+
+		/**
+		 * Note: seekTo will always be called instead of this unless you do setUseCustomSeekButtons(true)
+		 * 
+		 * @param direction
+		 */
+		void seekButton(int direction);
 
 		boolean isPlaying();
 	}
