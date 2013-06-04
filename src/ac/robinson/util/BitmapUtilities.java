@@ -55,7 +55,7 @@ public class BitmapUtilities {
 	// if a bitmap's width (height) is more than this many times its height (width) then the ScalingLogic.CROP option
 	// will be ignored and the bitmap will scaled to fit into the destination box to save memory
 	public static final int MAX_SAMPLE_WIDTH_HEIGHT_RATIO = 12;
-	
+
 	public static final float DOWNSCALE_RATIO = 6; // if using DOWNSCALE, will multiply the sample ratio by this value
 
 	public static class CacheTypeContainer {
@@ -242,7 +242,8 @@ public class BitmapUtilities {
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeFile(imagePath, options);
 		options.inJustDecodeBounds = false;
-		// options.inPurgeable = true; // not appropriate for image cache; to be enabled later
+		options.inPurgeable = true; // TODO: is this appropriate for image cache? is it actually used at all?
+		options.inInputShareable = true; // as above
 		options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight,
 				scalingLogic);
 		Bitmap unscaledBitmap = BitmapFactory.decodeFile(imagePath, options);
@@ -267,7 +268,8 @@ public class BitmapUtilities {
 			options.inJustDecodeBounds = true;
 			BitmapFactory.decodeStream(new FileInputStream(streamPath), null, options);
 			options.inJustDecodeBounds = false;
-			// options.inPurgeable = true; // not appropriate for image cache; to be enabled later
+			options.inPurgeable = true; // TODO: is this appropriate for image cache? is it actually used at all?
+			options.inInputShareable = true; // as above
 			options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight,
 					scalingLogic);
 			Bitmap unscaledBitmap = BitmapFactory.decodeStream(new FileInputStream(streamPath), null, options);
