@@ -182,7 +182,7 @@ public class SMILUtilities {
 						int elementDuration = getDurationFromString(mediaElement.getAttribute("dur"));
 
 						if ("text-media".equals(mediaElements.item(j).getNodeName())) {
-							currentFrame.addText(mediaElement.getTextContent(), elementId, elementDuration);
+							currentFrame.addTextFromSMIL(mediaElement.getTextContent(), elementId, elementDuration);
 
 						} else if (!TextUtils.isEmpty(elementSrc)) {
 							File sourceFile = new File(smilFile.getParent(), elementSrc);
@@ -197,8 +197,8 @@ public class SMILUtilities {
 								currentFrame.updateFrameMaxDuration(elementDuration);
 
 							} else {
-								currentFrame.addMedia(mediaElements.item(j).getNodeName(), sourceFile, elementId,
-										elementDuration, elementRegion, validateAudioLengths);
+								currentFrame.addMediaFromSMIL(mediaElements.item(j).getNodeName(), sourceFile,
+										elementId, elementDuration, elementRegion, validateAudioLengths);
 							}
 						}
 					}

@@ -24,22 +24,27 @@ import java.io.File;
 import java.util.ArrayList;
 
 import ac.robinson.util.IOUtilities;
+import android.text.TextUtils;
 
 public class FrameMediaContainer {
 
-	// TODO: convert to getters/setters? (slower, so probably not)
 	public String mParentId = null;
 	public String mFrameId;
 	public int mFrameSequenceId;
 	public int mFrameMaxDuration = 0; // milliseconds
+
 	public String mTextContent = null;
+	public int mTextDuration = -1; // milliseconds, only set if the user has set a specific duration for this item
+
 	public String mImagePath = null;
+	public int mImageDuration = -1; // milliseconds, only set if the user has set a specific duration for this item
 
 	public boolean mImageIsFrontCamera = false;
 	public boolean mImageIsLandscape = false;
 
 	public ArrayList<Integer> mAudioDurations = new ArrayList<Integer>();
 	public ArrayList<String> mAudioPaths = new ArrayList<String>();
+	public int mSpanningAudioIndex = -1; // only one spanning item per frame; if this is not -1 then that item spans
 
 	public FrameMediaContainer(String frameId, int frameSequenceId) {
 		mFrameId = frameId;
@@ -52,19 +57,53 @@ public class FrameMediaContainer {
 		}
 	}
 
-	public void addText(String textContent, String mediaId, int mediaDuration) {
-		mTextContent = textContent;
-		updateFrameMaxDuration(mediaDuration);
+	/**
+	 * Add an audio file to this container. Because audio items need to store a duration, they are added here; text and
+	 * images are added directly in the public member variables.
+	 * 
+	 * @param fileName the path to the audio file
+	 * @param audioDuration the duration of this audio item, in milliseconds
+	 * @return the index in mAudioPaths of the inserted item, or -1 if the item wasn't inserted (due to a missing or
+	 *         incompatible file)
+	 */
+	public int addAudioFile(String fileName, int audioDuration) {
+		File mediaFile = new File(fileName);
+		if (mediaFile.exists() && mediaFile.length() > 0) {
+			mAudioPaths.add(fileName);
+			mAudioDurations.add(audioDuration);
+			return mAudioPaths.size() - 1;
+		}
+		return -1;
 	}
 
-	public void addAudioFile(String fileName, int audioDuration) {
-		mAudioPaths.add(fileName);
-		mAudioDurations.add(audioDuration);
+	/**
+	 * Add text directly to this container from a SMIL import, and update the container's maximum duration.
+	 * 
+	 * @param textContent the text to add
+	 * @param mediaId the id of the media item (not currently used)
+	 * @param mediaDuration the duration of this text item, in milliseconds
+	 */
+	public void addTextFromSMIL(String textContent, String mediaId, int mediaDuration) {
+		if (!TextUtils.isEmpty(textContent)) {
+			mTextContent = textContent;
+			updateFrameMaxDuration(mediaDuration);
+		}
 	}
 
-	public void addMedia(String mediaType, File mediaFile, String mediaId, int mediaDuration, String mediaRegion,
-			boolean validateAudioLengths) {
-		if (mediaFile.exists()) {
+	/**
+	 * Add an image or audio item directly to this container from a SMIL import, and update the container's maximum
+	 * duration.
+	 * 
+	 * @param mediaType the type of this media item (the SMIL node's name)
+	 * @param mediaFile the file that contains the media
+	 * @param mediaId the id of the media item (not currently used)
+	 * @param mediaDuration the duration of the item, in milliseconds
+	 * @param mediaRegion the region - applicable to images only; SMIL_FRONT_IMAGE_STRING or SMIL_BACK_IMAGE_STRING
+	 * @param validateAudioLengths whether to re-calculate the duration of imported audio items
+	 */
+	public void addMediaFromSMIL(String mediaType, File mediaFile, String mediaId, int mediaDuration,
+			String mediaRegion, boolean validateAudioLengths) {
+		if (mediaFile.exists() && mediaFile.length() > 0) {
 			if ("img".equals(mediaType)) {
 				mImagePath = mediaFile.getAbsolutePath();
 				if (mediaRegion.startsWith(SMILUtilities.SMIL_FRONT_IMAGE_STRING)) {
@@ -75,8 +114,9 @@ public class FrameMediaContainer {
 
 				int preciseDuration = mediaDuration;
 
-				// check the audio duration - having the correct duration is *critical* for narrative playback
-				// TODO: fix playback so that this isn't the case?
+				// check the audio duration - having the correct audio duration stored used to be critical for correct
+				// playback; now it is less important, but it still helps for dividing other media over long-running
+				// audio items, so we continue to check lengths where appropriate
 				if (validateAudioLengths) {
 					int audioDuration = IOUtilities.getAudioFileLength(mediaFile);
 					if (audioDuration > 0) {

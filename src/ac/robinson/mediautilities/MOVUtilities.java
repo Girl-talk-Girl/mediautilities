@@ -177,7 +177,7 @@ public class MOVUtilities {
 			}
 		}
 
-		// must delete after creation because audio and video are interleaved in the MOV output
+		// deletion must be *after* creation because audio and video are interleaved in the MOV output
 		for (File file : filesToDelete) {
 			if (file != null && file.exists()) {
 				file.delete();
