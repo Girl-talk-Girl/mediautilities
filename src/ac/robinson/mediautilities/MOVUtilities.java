@@ -433,6 +433,10 @@ public class MOVUtilities {
 				for (String audioPath : frame.mAudioPaths) {
 					audioId += 1;
 
+					if (frame.mSpanningAudioIndex == audioId && !frame.mSpanningAudioRoot) {
+						continue; // don't need to add inherited spanning audio items - they've already been processed
+					}
+
 					// TODO: can only currently parse m4a and mp3 audio
 					String audioFileExtension = IOUtilities.getFileExtension(audioPath);
 					if (!AndroidUtilities.arrayContains(MediaUtilities.MOV_AUDIO_FILE_EXTENSIONS, audioFileExtension)) {

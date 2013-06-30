@@ -45,6 +45,7 @@ public class FrameMediaContainer {
 	public ArrayList<Integer> mAudioDurations = new ArrayList<Integer>();
 	public ArrayList<String> mAudioPaths = new ArrayList<String>();
 	public int mSpanningAudioIndex = -1; // only one spanning item per frame; if this is not -1 then that item spans
+	public boolean mSpanningAudioRoot = false; // whether this spanning audio item is the first part, or inherited
 
 	public FrameMediaContainer(String frameId, int frameSequenceId) {
 		mFrameId = frameId;
