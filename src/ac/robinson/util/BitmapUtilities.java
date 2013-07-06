@@ -521,10 +521,19 @@ public class BitmapUtilities {
 	public static boolean saveJPEGToJPEG(byte[] imageData, File saveTo, boolean flipHorizontally) {
 		FileOutputStream fileOutputStream = null;
 		try {
-			fileOutputStream = new FileOutputStream(saveTo);
+			try {
+				fileOutputStream = new FileOutputStream(saveTo);
+			} catch (FileNotFoundException e) {
+				if (saveTo.exists()) { // if we've previously failed, may have corrupted file - delete
+					saveTo.delete();
+				}
+				try {
+					fileOutputStream = new FileOutputStream(saveTo);
+				} catch (FileNotFoundException e2) {
+					return false;
+				}
+			}
 			fileOutputStream.write(imageData);
-		} catch (FileNotFoundException e) {
-			return false;
 		} catch (IOException e) {
 			return false;
 		} finally {
