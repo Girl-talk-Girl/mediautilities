@@ -8,7 +8,7 @@
     <string name="parent_directory">[Parent directory]</string>
 
     <!-- auto resize textview -->
-    <string name="textview_ellipsis">…</string>
+    <string name="textview_ellipsis" translatable="false">…</string>
 
     <!-- menu item -->
     <string name="menu_save">Save</string>
