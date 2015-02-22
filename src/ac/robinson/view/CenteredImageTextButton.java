@@ -29,14 +29,14 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.Button;
 
-// TODO: still an issue with icon visibility when the keyboard is shown or hidden combined with rotation
 public class CenteredImageTextButton extends Button {
 
 	// for calculating the default padding
 	private int mDrawableSize;
 	private boolean mLayoutChanged;
 	private DrawablePosition mDrawablePosition;
-	private Rect mTextBounds;
+
+	private Rect mTextBounds = new Rect();
 
 	// extra (optional) padding between the icon and the text
 	private int mIconPadding;
@@ -47,19 +47,18 @@ public class CenteredImageTextButton extends Button {
 
 	public CenteredImageTextButton(Context context) {
 		super(context);
-		mTextBounds = new Rect();
 		// can't initialise styles when not loading from XML
 	}
 
 	public CenteredImageTextButton(Context context, AttributeSet attrs) {
+		// can't combine with defStyle version here; we need android.R.attr.buttonStyle but defStyle doesn't work for
+		// custom views - see: https://code.google.com/p/android/issues/detail?id=12683
 		super(context, attrs);
-		mTextBounds = new Rect();
 		setStyles(context, attrs);
 	}
 
 	public CenteredImageTextButton(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		mTextBounds = new Rect();
 		setStyles(context, attrs);
 	}
 
@@ -109,6 +108,10 @@ public class CenteredImageTextButton extends Button {
 				break;
 			default:
 				break;
+		}
+
+		if (windowSize == 0) {
+			return; // we don't have a size (probably mid-window resize or extracted keyboard) - wait until next update
 		}
 
 		// compound drawables aren't scaled automatically, so make sure the current drawable isn't too big for the view

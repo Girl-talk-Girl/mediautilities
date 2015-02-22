@@ -40,6 +40,7 @@ import android.graphics.LightingColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -50,6 +51,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
@@ -319,6 +321,11 @@ public class UIUtilities {
 	 */
 	public static void setButtonColorFilters(View button, final int defaultColor, final int touchedColor) {
 
+		Drawable background = button.getBackground();
+		if (background == null) {
+			return;
+		}
+
 		final LightingColorFilter normalColour;
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
 			normalColour = new LightingColorFilter(defaultColor, Color.TRANSPARENT);
@@ -335,7 +342,23 @@ public class UIUtilities {
 			}
 		}
 
-		button.getBackground().setColorFilter(normalColour);
+		background.setColorFilter(normalColour);
+
+		// before Honeycomb the colour filter looks bad on a focused button, and if we use the blanking approach
+		// (above) then we lose the gradient of a button; instead we remove the colour filter entirely
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+			button.setOnFocusChangeListener(new OnFocusChangeListener() {
+				@Override
+				public void onFocusChange(View v, boolean hasFocus) {
+					if (hasFocus) {
+						v.getBackground().clearColorFilter();
+					} else {
+						v.getBackground().setColorFilter(normalColour);
+					}
+				}
+			});
+		}
+
 		button.setOnTouchListener(new OnTouchListener() {
 			Rect viewRect;
 

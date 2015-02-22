@@ -177,7 +177,7 @@ public class MOVUtilities {
 			}
 		}
 
-		// must delete after creation because audio and video are interleaved in the MOV output
+		// deletion must be *after* creation because audio and video are interleaved in the MOV output
 		for (File file : filesToDelete) {
 			if (file != null && file.exists()) {
 				file.delete();
@@ -206,17 +206,23 @@ public class MOVUtilities {
 
 			// we need these values in seconds, but store in milliseconds so we don't round incorrectly later
 			frameDuration = frame.mFrameMaxDuration;
-
-			int audioLengthIndex = 0;
 			int audioDuration;
+
+			int audioId = -1;
 			for (String audioPath : frame.mAudioPaths) {
+				audioId += 1;
+
+				// don't need to add inherited spanning audio items - they've already been processed
+				if (frame.mSpanningAudioIndex == audioId && !frame.mSpanningAudioRoot) {
+					continue;
+				}
 
 				String audioFileExtension = IOUtilities.getFileExtension(audioPath);
 				if (!AndroidUtilities.arrayContains(MediaUtilities.MOV_AUDIO_FILE_EXTENSIONS, audioFileExtension)) {
-					continue; // TODO: can only currently parse m4a and mp3 audio
+					continue;
 				}
 
-				audioDuration = frame.mAudioDurations.get(audioLengthIndex);
+				audioDuration = frame.mAudioDurations.get(audioId);
 
 				File inputAudioFile = new File(audioPath);
 				File outputPCMFile = null;
@@ -226,7 +232,7 @@ public class MOVUtilities {
 				boolean decodingError;
 
 				try {
-					// both methods need a PCM file to write to
+					// all methods need a PCM file to write to
 					outputPCMFile = File.createTempFile(inputAudioFile.getName(), ".pcm", tempDirectory);
 					filesToDelete.add(outputPCMFile);
 					outputPCMStream = new BufferedOutputStream(new FileOutputStream(outputPCMFile));
@@ -332,9 +338,6 @@ public class MOVUtilities {
 				} finally {
 					IOUtilities.closeStream(outputPCMStream);
 				}
-
-				// go to the next media item regardless
-				audioLengthIndex += 1;
 			}
 
 			// go to the next frame regardless
@@ -425,15 +428,21 @@ public class MOVUtilities {
 			long frameStartTime = 0;
 			for (FrameMediaContainer frame : framesToSend) {
 
-				int audioId = -1;
 				boolean audioFound = false;
 				boolean decodingError = false;
 				AudioType currentAudioType = AudioType.NONE;
 
+				int audioId = -1;
 				for (String audioPath : frame.mAudioPaths) {
 					audioId += 1;
 
-					// TODO: can only currently parse m4a and mp3 audio
+					// don't need to add inherited spanning audio items - they've already been processed
+					if (frame.mSpanningAudioIndex == audioId && !frame.mSpanningAudioRoot) {
+						frame.mSpanningAudioIndex = -1; // this frame no longer has any spanning audio
+						audioFound = true;
+						break; // no more items in this frame can be added, as the spanning item overlaps them
+					}
+
 					String audioFileExtension = IOUtilities.getFileExtension(audioPath);
 					if (!AndroidUtilities.arrayContains(MediaUtilities.MOV_AUDIO_FILE_EXTENSIONS, audioFileExtension)) {
 						continue;
@@ -625,6 +634,7 @@ public class MOVUtilities {
 				// we've processed this file (any error that occurred is irrelevant at this point - remove track anyway)
 				if (audioFound) {
 					frame.mAudioPaths.remove(audioId);
+					frame.mAudioDurations.remove(audioId);
 				}
 
 				// move on to the next frame's start time

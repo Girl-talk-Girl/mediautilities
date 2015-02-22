@@ -188,7 +188,7 @@ public class CrossFadeDrawable extends Drawable {
 		invalidateSelf();
 	}
 
-	Bitmap getEnd() {
+	public Bitmap getEnd() {
 		return mEnd;
 	}
 

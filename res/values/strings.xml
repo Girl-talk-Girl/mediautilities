@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- TODO: remove these strings into individual projects to make translation easier -->
     <!-- directory selector -->
     <string name="current_location">Current: </string>
     <string name="select_directory">Select</string>
     <string name="parent_directory">[Parent directory]</string>
-    
+
     <!-- auto resize textview -->
     <string name="textview_ellipsis">…</string>
 
