@@ -20,6 +20,19 @@
 
 package ac.robinson.util;
 
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
+
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
@@ -35,19 +48,6 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaPlayer;
-import android.os.Build;
-import android.os.Environment;
-import android.provider.MediaStore;
 
 public class IOUtilities {
 	public static final int IO_BUFFER_SIZE = 4 * 1024;
@@ -339,6 +339,28 @@ public class IOUtilities {
 				IOUtilities.closeStream(bufferedReader);
 				IOUtilities.closeStream(fileStream);
 			}
+		}
+		if (fileString.length() > 0) {
+			fileString.deleteCharAt(fileString.length() - 1);
+		}
+		return fileString.toString();
+	}
+
+	public static String getFileContents(InputStream stream) {
+		StringBuilder fileString = new StringBuilder();
+		BufferedReader bufferedReader = null;
+		String currentLine;
+		try {
+			bufferedReader = new BufferedReader(new InputStreamReader(stream));
+			while ((currentLine = bufferedReader.readLine()) != null) {
+				fileString.append(currentLine);
+				fileString.append("\n");
+			}
+		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
+		} finally {
+			IOUtilities.closeStream(bufferedReader);
+			IOUtilities.closeStream(stream);
 		}
 		if (fileString.length() > 0) {
 			fileString.deleteCharAt(fileString.length() - 1);
