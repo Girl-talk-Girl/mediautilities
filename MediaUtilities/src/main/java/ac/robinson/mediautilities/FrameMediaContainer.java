@@ -20,11 +20,12 @@
 
 package ac.robinson.mediautilities;
 
+import android.text.TextUtils;
+
 import java.io.File;
 import java.util.ArrayList;
 
 import ac.robinson.util.IOUtilities;
-import android.text.TextUtils;
 
 public class FrameMediaContainer {
 
@@ -46,6 +47,9 @@ public class FrameMediaContainer {
 	public ArrayList<String> mAudioPaths = new ArrayList<String>();
 	public int mSpanningAudioIndex = -1; // only one spanning item per frame; if this is not -1 then that item spans
 	public boolean mSpanningAudioRoot = false; // whether this spanning audio item is the first part, or inherited
+
+	public int mBackgroundColour = 0;
+	public int mForegroundColour = 0;
 
 	public FrameMediaContainer(String frameId, int frameSequenceId) {
 		mFrameId = frameId;

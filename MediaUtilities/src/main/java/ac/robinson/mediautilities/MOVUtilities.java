@@ -20,6 +20,21 @@
 
 package ac.robinson.mediautilities;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.Typeface;
+import android.net.Uri;
+import android.text.TextUtils;
+import android.util.Log;
+
+import com.bric.audio.AudioFormat;
+import com.bric.audio.AudioInputStream;
+import com.larvalabs.svgandroid.SVG;
+import com.larvalabs.svgandroid.SVGParser;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,20 +56,6 @@ import ac.robinson.util.AndroidUtilities;
 import ac.robinson.util.BitmapUtilities;
 import ac.robinson.util.IOUtilities;
 import ac.robinson.util.ImageCacheUtilities;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.RectF;
-import android.graphics.Typeface;
-import android.net.Uri;
-import android.text.TextUtils;
-import android.util.Log;
-
-import com.bric.audio.AudioFormat;
-import com.bric.audio.AudioInputStream;
-import com.larvalabs.svgandroid.SVG;
-import com.larvalabs.svgandroid.SVGParser;
 
 // mov export: http://java.net/projects/javagraphics/sources/svn/show/trunk/src/com/bric
 // m4a import: http://jaadec.sourceforge.net/ - for an alternative, see: http://www.randelshofer.ch/monte/index.html
@@ -128,7 +129,7 @@ public class MOVUtilities {
 			for (FrameMediaContainer frame : framesToSend) {
 
 				imageLoaded = false;
-				baseCanvas.drawColor(backgroundColour);
+				baseCanvas.drawColor(frame.mBackgroundColour < 0 ? frame.mBackgroundColour : backgroundColour);
 
 				if (frame.mImagePath != null) {
 					// scale image size to make sure it is small enough to fit in the container
@@ -146,7 +147,7 @@ public class MOVUtilities {
 
 				if (!TextUtils.isEmpty(frame.mTextContent)) {
 					BitmapUtilities.drawScaledText(frame.mTextContent, baseCanvas, basePaint,
-							(imageLoaded ? textColourWithImage : textColourNoImage),
+							frame.mForegroundColour < 0 ? frame.mForegroundColour : (imageLoaded ? textColourWithImage : textColourNoImage),
 							(imageLoaded ? textBackgroundColour : 0), textSpacing, textCornerRadius, imageLoaded, 0,
 							textBackgroundSpanWidth, baseBitmap.getHeight(), textMaxFontSize, textMaxCharsPerLine);
 
