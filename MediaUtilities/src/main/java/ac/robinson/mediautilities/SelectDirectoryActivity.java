@@ -20,14 +20,6 @@
 
 package ac.robinson.mediautilities;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Context;
@@ -39,6 +31,16 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import ac.robinson.util.UIUtilities;
 
 // TODO: use a better picker, such as: https://github.com/iPaulPro/aFileChooser
 public class SelectDirectoryActivity extends ListActivity {
@@ -94,7 +96,7 @@ public class SelectDirectoryActivity extends ListActivity {
 			}
 		});
 
-		mPathView.setText(getString(R.string.current_location) + currentPath);
+		mPathView.setText(getString(R.string.current_location, currentPath));
 
 		if (!currentPath.equals(ROOT)) {
 			addItem("/bi/" + getString(R.string.parent_directory));
@@ -133,7 +135,7 @@ public class SelectDirectoryActivity extends ListActivity {
 			if (file.canRead()) {
 				getDirectory(file);
 			} else {
-				// TODO: UIUtilities.showToast(SelectDirectoryActivity.this, R.string.error_access_denied);
+				UIUtilities.showToast(SelectDirectoryActivity.this, R.string.directory_browser_error);
 			}
 		}
 	}
