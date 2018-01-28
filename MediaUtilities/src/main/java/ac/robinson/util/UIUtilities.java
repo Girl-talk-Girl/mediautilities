@@ -20,15 +20,8 @@
 
 package ac.robinson.util;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.List;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -44,7 +37,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -56,6 +48,8 @@ import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
+
+import java.util.List;
 
 public class UIUtilities {
 
@@ -254,19 +248,6 @@ public class UIUtilities {
 
 	public static void releaseKeepScreenOn(Window window) {
 		window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-	}
-
-	/**
-	 * Use acquireKeepScreenOn instead - key guard lock method left here only as a reminder
-	 * 
-	 * Requires <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-	 */
-	@Deprecated
-	public static KeyguardManager.KeyguardLock acquireKeyguardLock(Activity activity) {
-		KeyguardManager keyguardManager = (KeyguardManager) activity.getSystemService(Activity.KEYGUARD_SERVICE);
-		KeyguardManager.KeyguardLock keyguardLock = keyguardManager.newKeyguardLock(Activity.KEYGUARD_SERVICE);
-		keyguardLock.disableKeyguard();
-		return keyguardLock;
 	}
 
 	public static void showToast(Context context, int id) {

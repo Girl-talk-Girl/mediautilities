@@ -125,7 +125,7 @@ public class IOUtilities {
 
 	/**
 	 * Closes the specified stream.
-	 * 
+	 *
 	 * @param stream The stream to close.
 	 */
 	public static boolean closeStream(Closeable stream) {
@@ -241,8 +241,11 @@ public class IOUtilities {
 
 	public static boolean deleteRecursive(File fileOrDirectory) {
 		if (fileOrDirectory.isDirectory()) {
-			for (File child : fileOrDirectory.listFiles()) {
-				deleteRecursive(child);
+			File[] fileList = fileOrDirectory.listFiles();
+			if (fileList != null) {
+				for (File child : fileList) {
+					deleteRecursive(child);
+				}
 			}
 		}
 		return fileOrDirectory.delete();
@@ -281,8 +284,7 @@ public class IOUtilities {
 
 		// Remove the extension.
 		int extensionIndex = filename.lastIndexOf(".");
-		if (extensionIndex == -1)
-			return filename;
+		if (extensionIndex == -1) return filename;
 
 		return filename.substring(0, extensionIndex);
 	}
@@ -373,8 +375,7 @@ public class IOUtilities {
 	}
 
 	public static boolean fileExtensionIs(String fileName, String extension) {
-		return fileName == null ? false : fileName.toLowerCase(Locale.ENGLISH).endsWith(
-				extension.toLowerCase(Locale.ENGLISH));
+		return fileName != null && fileName.toLowerCase(Locale.ENGLISH).endsWith(extension.toLowerCase(Locale.ENGLISH));
 	}
 
 	public static File newDatedFileName(File baseDirectory, String fileExtension) {
@@ -387,15 +388,15 @@ public class IOUtilities {
 			newFileName.setLength(0);
 			newFileName.append(fileDate.get(Calendar.YEAR));
 			newFileName.append("-");
-			newFileName.append(String.format("%02d", fileDate.get(Calendar.MONTH) + 1));
+			newFileName.append(String.format(Locale.US, "%02d", fileDate.get(Calendar.MONTH) + 1));
 			newFileName.append("-");
-			newFileName.append(String.format("%02d", fileDate.get(Calendar.DAY_OF_MONTH)));
+			newFileName.append(String.format(Locale.US, "%02d", fileDate.get(Calendar.DAY_OF_MONTH)));
 			newFileName.append("_");
-			newFileName.append(String.format("%02d", fileDate.get(Calendar.HOUR_OF_DAY)));
+			newFileName.append(String.format(Locale.US, "%02d", fileDate.get(Calendar.HOUR_OF_DAY)));
 			newFileName.append("-");
-			newFileName.append(String.format("%02d", fileDate.get(Calendar.MINUTE)));
+			newFileName.append(String.format(Locale.US, "%02d", fileDate.get(Calendar.MINUTE)));
 			newFileName.append("-");
-			newFileName.append(String.format("%02d", fileDate.get(Calendar.SECOND)));
+			newFileName.append(String.format(Locale.US, "%02d", fileDate.get(Calendar.SECOND)));
 			if (fileExists) {
 				// add random chars to avoid collisions
 				newFileName.append("_");
@@ -411,17 +412,18 @@ public class IOUtilities {
 
 	/**
 	 * Get the duration of an audio file using MediaPlayer
-	 * 
+	 *
 	 * @param audioFile
 	 * @return the file's duration, or -1 on error
 	 */
 	public static int getAudioFileLength(File audioFile) {
-		MediaPlayer mediaPlayer = new MediaPlayer();
+		MediaPlayer mediaPlayer = null;
 		FileInputStream playerInputStream = null;
 		int audioDuration = -1;
 		try {
 			// can't play from data directory (it's private; permissions don't work), must use input stream
 			// mediaPlayer = MediaPlayer.create(activity, Uri.fromFile(audioFile));
+			mediaPlayer = new MediaPlayer();
 			playerInputStream = new FileInputStream(audioFile);
 			mediaPlayer.setDataSource(playerInputStream.getFD());
 			mediaPlayer.prepare();

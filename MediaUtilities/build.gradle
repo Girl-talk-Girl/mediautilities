@@ -1,14 +1,15 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
-        minSdkVersion 8
-        targetSdkVersion 26
-        versionCode 10
-        versionName '1.5.4'
+        //noinspection MinSdkTooLow
+        minSdkVersion 8 // we *want* to support low SDK versions (older devices)
+        targetSdkVersion 27
+        versionCode 13
+        versionName '1.5.7'
     }
 
     compileOptions {
@@ -19,13 +20,11 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-
-            shrinkResources true
+            consumerProguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-mediautilities.txt'
         }
     }
 }
 
 dependencies {
-    // compile files('libs/libopencore-wrapper_armeabi.jar') // no-longer needed - libraries in jniLibs are automatically imported
+    // compile files('libs/libopencore-wrapper_armeabi.jar') // no-longer needed - jniLibs are automatically imported
 }

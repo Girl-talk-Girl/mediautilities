@@ -52,8 +52,8 @@ public class SelectDirectoryActivity extends ListActivity {
 	public static final String RESULT_PATH = "result_path";
 
 	private TextView mPathView;
-	private ArrayList<HashMap<String, String>> mFileList = new ArrayList<HashMap<String, String>>();;
-	private List<String> mPaths = new ArrayList<String>();;
+	private ArrayList<HashMap<String, String>> mFileList = new ArrayList<>();
+	private List<String> mPaths = new ArrayList<>();
 
 	private File currentPath = ROOT;
 
@@ -79,6 +79,13 @@ public class SelectDirectoryActivity extends ListActivity {
 			currentPath = ROOT;
 			files = currentPath.listFiles();
 		}
+
+		if (files == null) {
+			UIUtilities.showToast(SelectDirectoryActivity.this, R.string.directory_browser_error);
+			finish();
+			return;
+		}
+
 		Arrays.sort(files, new Comparator<File>() {
 			@Override
 			public int compare(File o1, File o2) {
@@ -116,8 +123,8 @@ public class SelectDirectoryActivity extends ListActivity {
 			}
 		}
 
-		StyledSimpleAdapter fileList = new StyledSimpleAdapter(this, mFileList, R.layout.select_directory_row,
-				new String[] { ITEM_KEY }, new int[] { R.id.directory_selector_row });
+		StyledSimpleAdapter fileList = new StyledSimpleAdapter(this, mFileList, R.layout.select_directory_row, new
+				String[]{ITEM_KEY}, new int[]{R.id.directory_selector_row});
 
 		setListAdapter(fileList);
 	}
@@ -168,9 +175,8 @@ public class SelectDirectoryActivity extends ListActivity {
 		}
 	}
 
-	public class StyledSimpleAdapter extends SimpleAdapter {
-		public StyledSimpleAdapter(Context context, List<? extends Map<String, ?>> data, int resource, String[] from,
-				int[] to) {
+	private class StyledSimpleAdapter extends SimpleAdapter {
+		StyledSimpleAdapter(Context context, List<? extends Map<String, ?>> data, int resource, String[] from, int[] to) {
 			super(context, data, resource, from, to);
 		}
 
